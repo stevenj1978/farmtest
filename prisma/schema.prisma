@@ -1,0 +1,61 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Farm {
+  id              String    @id @default(cuid())
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  name            String
+  description     String?
+  address         String
+  city            String
+  state           String
+  zipCode         String
+  latitude        Float?
+  longitude       Float?
+  phone           String?
+  email           String
+  website         String?
+  certifications  Json?     // Store array of certifications
+  products        Product[]
+  userId          String    // Reference to the user who owns this farm
+  user            User      @relation(fields: [userId], references: [id])
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  name        String
+  description String?
+  category    String   // e.g., vegetables, beef, pork
+  subcategory String?  // e.g., tomatoes, ground beef
+  price       Float
+  unit        String   // e.g., lb, piece, bunch
+  inStock     Boolean  @default(true)
+  attributes  Json?    // Store product attributes (organic, grass-fed, etc.)
+  farmId      String
+  farm        Farm     @relation(fields: [farmId], references: [id])
+}
+
+model User {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  email     String   @unique
+  name      String?
+  farms     Farm[]
+  role      Role     @default(CUSTOMER)
+}
+
+enum Role {
+  ADMIN
+  FARMER
+  CUSTOMER
+}
